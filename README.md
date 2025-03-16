@@ -1,1 +1,152 @@
-# project
+import datetime # project
+
+class Medicine:
+    def _init_(self, name, price, stock):
+        self.name = name
+        self.price = price
+        self.stock = stock
+
+    def _str_(self):
+        return f"{self.name} -₹{self.price} (Stock: {self.stock})"
+
+
+class MedicalShop:
+    def _init_(self):
+        self.medicines = []
+        self.customers = [] 
+        self.sales = []     
+    def add_medicine(self, name, price, stock):
+        new_medicine = Medicine(name, price, stock)
+        self.medicines.append(new_medicine)
+
+    def display_medicines(self):
+        if not self.medicines:
+            print("No medicines available in stock.")
+        else:
+            print("\nAvailable Medicines:")
+            for idx, medicine in enumerate(self.medicines, 1):
+                print(f"{idx}. {medicine}")
+
+    def sell_medicine(self, medicine_index, quantity, customer_name, customer_phone):
+        if medicine_index < 1 or medicine_index > len(self.medicines):
+            print("Invalid selection. Please choose a valid medicine.")
+            return
+
+        medicine = self.medicines[medicine_index - 1]
+
+        if quantity > medicine.stock:
+            print(f"Insufficient stock. Only {medicine.stock} items available.")
+        else:
+            total_cost = medicine.price * quantity
+            medicine.stock -= quantity  
+            invoice = {
+                'invoice_id': len(self.sales) + 1,
+                'date': datetime.datetime.now(),
+                'medicine': medicine.name,
+                'quantity': quantity,
+                'unit_price': medicine.price,
+                'total_cost': total_cost,
+                'customer': {
+                    'name': customer_name,
+                    'phone': customer_phone
+                }
+            }
+
+            self.sales.append(invoice)
+
+            self.save_customer_details(customer_name, customer_phone)
+
+            print(f"\nInvoice Generated:\n")
+            print(f"Customer: {customer_name} (Phone: {customer_phone})")
+            print(f"Medicine: {medicine.name}")
+            print(f"Quantity: {quantity}")
+            print(f"Total Cost: ₹{total_cost}")
+            print(f"Remaining stock: {medicine.stock}")
+            print(f"Invoice ID: {invoice['invoice_id']}")
+
+    def save_customer_details(self, name, phone):
+        for customer in self.customers:
+            if customer['name'] == name and customer['phone'] == phone:
+                return  
+        self.customers.append({'name': name, 'phone': phone})
+
+    def view_sales(self):
+        if not self.sales:
+            print("No sales have been made yet.")
+        else:
+            print("\nSales History:")
+            for invoice in self.sales:
+                print(f"Invoice ID: {invoice['invoice_id']} | Date: {invoice['date']} | Customer: {invoice['customer']['name']} | Total: ₹{invoice['total_cost']}")
+
+    def restock_medicine(self, medicine_index, quantity):
+        if medicine_index < 1 or medicine_index > len(self.medicines):
+            print("Invalid selection. Please choose a valid medicine.")
+            return
+
+        medicine = self.medicines[medicine_index - 1]
+        medicine.stock += quantity
+        print(f"Restocked {quantity} {medicine.name}(s). Total stock: {medicine.stock}")
+
+def main():
+    shop = MedicalShop()
+
+    shop.add_medicine("Paracetamol", 5.0, 50)
+    shop.add_medicine("Aspirin", 7.5, 30)
+    shop.add_medicine("Cough Syrup", 3.0, 20)
+
+    while True:
+        print("\nMedical Shop Menu")
+        print("1. Display Medicines")
+        print("2. Sell Medicine")
+        print("3. Restock Medicine")
+        print("4. View Sales/Invoices")
+        print("5. Add New Medicine")
+        print("6. Exit")
+
+        choice = input("Enter your choice: ")
+
+        if choice == '1':
+            shop.display_medicines()
+
+        elif choice == '2':
+            shop.display_medicines()
+            try:
+                medicine_index = int(input("Enter medicine number to sell: "))
+                quantity = int(input("Enter quantity to sell: "))
+                customer_name = input("Enter customer name: ")
+                customer_phone = input("Enter customer phone: ")
+                shop.sell_medicine(medicine_index, quantity, customer_name, customer_phone)
+            except ValueError:
+                print("Invalid input. Please enter valid numbers.")
+
+        elif choice == '3':
+            shop.display_medicines()
+            try:
+                medicine_index = int(input("Enter medicine number to restock: "))
+                quantity = int(input("Enter quantity to restock: "))
+                shop.restock_medicine(medicine_index, quantity)
+            except ValueError:
+                print("Invalid input. Please enter valid numbers.")
+
+        elif choice == '4':
+            shop.view_sales()
+
+        elif choice == '5':
+            name = input("Enter medicine name: ")
+            try:
+                price = float(input("Enter medicine price: "))
+                stock = int(input("Enter initial stock: "))
+                shop.add_medicine(name, price, stock)
+                print(f"{name} added to the shop.")
+            except ValueError:
+                print("Invalid input. Please enter valid price and stock.")
+
+        elif choice == '6':
+            print("Exiting Medical Shop System.")
+            break
+
+        else:
+            print("Invalid choice. Please try again.")
+
+if _name_ == "_main_":
+    main()
